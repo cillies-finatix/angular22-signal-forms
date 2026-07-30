@@ -3,6 +3,10 @@ import { TestBed } from '@angular/core/testing';
 import { SignalFormsDemoComponent } from './signal-forms-demo.component';
 
 describe('SignalFormsDemoComponent', () => {
+  afterEach(() => {
+    vi.useRealTimers();
+  });
+
   it('renders the signal forms demo', async () => {
     const fixture = TestBed.createComponent(SignalFormsDemoComponent);
     await fixture.whenStable();
@@ -47,5 +51,36 @@ describe('SignalFormsDemoComponent', () => {
 
     expect(hostElement.querySelector('.status')?.textContent).toContain('Formular gültig');
     expect(hostElement.querySelector('pre')?.textContent).toContain('"name": "Ada"');
+
+    vi.useFakeTimers();
+    const submitButton = hostElement.querySelector<HTMLButtonElement>('button[type="submit"]');
+    hostElement.querySelector<HTMLFormElement>('form')?.dispatchEvent(new Event('submit', { bubbles: true, cancelable: true }));
+    fixture.detectChanges();
+
+    expect(submitButton?.disabled).toBe(true);
+    expect(submitButton?.textContent).toContain('Profil wird geprüft');
+
+    await vi.runAllTimersAsync();
+    fixture.detectChanges();
+
+    expect(submitButton?.disabled).toBe(false);
+    expect(submitButton?.textContent).toContain('Profil prüfen');
+  });
+
+  it('submits through FormRoot and reveals validation errors', async () => {
+    const fixture = TestBed.createComponent(SignalFormsDemoComponent);
+    await fixture.whenStable();
+
+    const hostElement: HTMLElement = fixture.nativeElement;
+    const formElement = hostElement.querySelector<HTMLFormElement>('form');
+    const submitEvent = new Event('submit', { bubbles: true, cancelable: true });
+
+    expect(formElement).not.toBeNull();
+    formElement?.dispatchEvent(submitEvent);
+    fixture.detectChanges();
+
+    expect(submitEvent.defaultPrevented).toBe(true);
+    expect(hostElement.querySelector('[autocomplete="name"] + .error')?.textContent).toContain('Name ist erforderlich.');
+    expect(hostElement.querySelector('[role="alert"]')?.textContent).toContain('Bitte korrigiere die markierten Eingaben.');
   });
 });

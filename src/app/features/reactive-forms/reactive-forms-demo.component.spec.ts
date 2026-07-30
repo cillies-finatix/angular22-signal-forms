@@ -3,6 +3,10 @@ import { TestBed } from '@angular/core/testing';
 import { ReactiveFormsDemoComponent } from './reactive-forms-demo.component';
 
 describe('ReactiveFormsDemoComponent', () => {
+  afterEach(() => {
+    vi.useRealTimers();
+  });
+
   it('renders the reactive forms demo', async () => {
     const fixture = TestBed.createComponent(ReactiveFormsDemoComponent);
     await fixture.whenStable();
@@ -47,5 +51,19 @@ describe('ReactiveFormsDemoComponent', () => {
 
     expect(hostElement.querySelector('.status')?.textContent).toContain('Formular gültig');
     expect(hostElement.querySelector('pre')?.textContent).toContain('"name": "Ada"');
+
+    vi.useFakeTimers();
+    const submitButton = hostElement.querySelector<HTMLButtonElement>('button[type="submit"]');
+    hostElement.querySelector<HTMLFormElement>('form')?.dispatchEvent(new Event('submit', { bubbles: true, cancelable: true }));
+    fixture.detectChanges();
+
+    expect(submitButton?.disabled).toBe(true);
+    expect(submitButton?.textContent).toContain('Profil wird geprüft');
+
+    await vi.runAllTimersAsync();
+    fixture.detectChanges();
+
+    expect(submitButton?.disabled).toBe(false);
+    expect(submitButton?.textContent).toContain('Profil prüfen');
   });
 });

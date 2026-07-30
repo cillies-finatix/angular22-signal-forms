@@ -129,7 +129,13 @@ const matchingEmails: ValidatorFn = (control): ValidationErrors | null => {
       </fieldset>
 
       <div class="form-footer">
-        <button type="submit">Profil prüfen</button>
+        <button type="submit" [disabled]="submitting()">
+          @if (submitting()) {
+            Profil wird geprüft…
+          } @else {
+            Profil prüfen
+          }
+        </button>
         <span class="status" [class.is-valid]="form.valid" [class.is-invalid]="form.invalid">
           {{ form.valid ? 'Formular gültig' : 'Formular enthält Fehler' }}
         </span>
@@ -147,6 +153,7 @@ const matchingEmails: ValidatorFn = (control): ValidationErrors | null => {
 })
 export class ReactiveFormsDemoComponent {
   protected readonly wasSubmitted = signal(false);
+  protected readonly submitting = signal(false);
   protected readonly form = new FormGroup({
     name: new FormControl('', { nonNullable: true, validators: [Validators.required] }),
     age: new FormControl<number | null>(null, [Validators.required, Validators.min(18)]),
@@ -191,9 +198,20 @@ export class ReactiveFormsDemoComponent {
     return value instanceof Date ? value.toISOString().slice(0, 10) : '';
   }
 
-  protected submit(): void {
+  protected async submit(): Promise<void> {
     this.wasSubmitted.set(true);
     this.form.markAllAsTouched();
+
+    if (this.form.invalid) {
+      return;
+    }
+
+    this.submitting.set(true);
+    try {
+      await new Promise<void>((resolve) => setTimeout(resolve, 750));
+    } finally {
+      this.submitting.set(false);
+    }
   }
 
   private createDynamicField(): FormGroup<DynamicFieldControls> {

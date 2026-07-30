@@ -34,7 +34,7 @@ interface ProfileModel {
       <p>Das Form-Tree wird aus einem Signal-Modell abgeleitet; Regeln werden deklarativ an Pfade gebunden.</p>
     </section>
 
-    <form class="demo-form" [formRoot]="profileForm" (submit)="submit($event)">
+    <form class="demo-form" [formRoot]="profileForm">
       <fieldset>
         <legend>Profil</legend>
         <div class="field-grid">
@@ -130,7 +130,13 @@ interface ProfileModel {
       </fieldset>
 
       <div class="form-footer">
-        <button type="submit">Profil prüfen</button>
+        <button type="submit" [disabled]="profileForm().submitting()">
+          @if (profileForm().submitting()) {
+            Profil wird geprüft…
+          } @else {
+            Profil prüfen
+          }
+        </button>
         <span class="status" [class.is-valid]="profileForm().valid()" [class.is-invalid]="profileForm().invalid()">
           {{ profileForm().valid() ? 'Formular gültig' : 'Formular enthält Fehler' }}
         </span>
@@ -160,27 +166,39 @@ export class SignalFormsDemoComponent {
   });
 
   // Schema functions attach validation and field state directly to paths in the model tree.
-  protected readonly profileForm = form(this.model, (profile) => {
-    required(profile.name, { message: 'Name ist erforderlich.' });
-    required(profile.age, { message: 'Alter ist erforderlich.' });
-    min(profile.age, 18, { message: 'Mindestalter: 18 Jahre.' });
-    required(profile.priority, { message: 'Priorität ist erforderlich.' });
-    required(profile.email, { message: 'E-Mail ist erforderlich.' });
-    email(profile.email, { message: 'Bitte eine gültige E-Mail eingeben.' });
-    required(profile.emailConfirmation, { message: 'E-Mail-Bestätigung ist erforderlich.' });
-    validateTree(profile, ({ value }) => {
-      // Tree validation can compare values from multiple fields without a separate form group.
-      const currentProfile = value();
-      return currentProfile.email && currentProfile.emailConfirmation && currentProfile.email !== currentProfile.emailConfirmation
-        ? { kind: 'email-mismatch', message: 'Die E-Mail-Adressen stimmen nicht überein.' }
-        : undefined;
-    });
-    applyEach(profile.dynamicFields, (field) => {
-      // New array entries automatically receive these rules as soon as the model is updated.
-      required(field.label, { message: 'Ein Feldname ist erforderlich.' });
-      required(field.value, { message: 'Ein Wert ist erforderlich.' });
-    });
-  });
+  protected readonly profileForm = form(
+    this.model,
+    (profile) => {
+      required(profile.name, { message: 'Name ist erforderlich.' });
+      required(profile.age, { message: 'Alter ist erforderlich.' });
+      min(profile.age, 18, { message: 'Mindestalter: 18 Jahre.' });
+      required(profile.priority, { message: 'Priorität ist erforderlich.' });
+      required(profile.email, { message: 'E-Mail ist erforderlich.' });
+      email(profile.email, { message: 'Bitte eine gültige E-Mail eingeben.' });
+      required(profile.emailConfirmation, { message: 'E-Mail-Bestätigung ist erforderlich.' });
+      validateTree(profile, ({ value }) => {
+        // Tree validation can compare values from multiple fields without a separate form group.
+        const currentProfile = value();
+        return currentProfile.email && currentProfile.emailConfirmation && currentProfile.email !== currentProfile.emailConfirmation
+          ? { kind: 'email-mismatch', message: 'Die E-Mail-Adressen stimmen nicht überein.' }
+          : undefined;
+      });
+      applyEach(profile.dynamicFields, (field) => {
+        // New array entries automatically receive these rules as soon as the model is updated.
+        required(field.label, { message: 'Ein Feldname ist erforderlich.' });
+        required(field.value, { message: 'Ein Wert ist erforderlich.' });
+      });
+    },
+    {
+      submission: {
+        action: async () => {
+          this.markSubmitted();
+          await new Promise<void>((resolve) => setTimeout(resolve, 750));
+        },
+        onInvalid: () => this.markSubmitted(),
+      },
+    },
+  );
 
   protected readonly emailsMismatch = computed(() => {
     const { email: emailValue, emailConfirmation } = this.model();
@@ -233,11 +251,6 @@ export class SignalFormsDemoComponent {
     return value instanceof Date ? value.toISOString().slice(0, 10) : '';
   }
 
-  protected submit(event: SubmitEvent): void {
-    event.preventDefault();
-    this.wasSubmitted.set(true);
-  }
-
   private updateDynamicField(index: number, update: (field: DynamicFieldModel) => DynamicFieldModel): void {
     this.model.update((profile) => ({
       ...profile,
@@ -252,6 +265,10 @@ export class SignalFormsDemoComponent {
   private toDate(event: Event): Date | null {
     const value = this.toText(event);
     return value ? new Date(`${value}T00:00:00`) : null;
+  }
+
+  private markSubmitted(): void {
+    this.wasSubmitted.set(true);
   }
 
   private dateReplacer(_: string, value: unknown): unknown {
