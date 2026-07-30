@@ -1,16 +1,22 @@
-import { Component, signal } from '@angular/core';
-import { RouterOutlet } from '@angular/router';
+import { Component } from '@angular/core';
+import { RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
 
 @Component({
   selector: 'app-root',
-  imports: [RouterOutlet],
+  imports: [RouterLink, RouterLinkActive, RouterOutlet],
   template: `
-    <h1>Hello, {{ title() }}</h1>
+    <header class="site-header">
+      <a class="brand" routerLink="/">Angular Forms Lab</a>
+      <nav aria-label="Hauptnavigation">
+        <a routerLink="/reactive-forms" routerLinkActive="is-active">Reactive Forms</a>
+        <a routerLink="/signal-forms" routerLinkActive="is-active">Signal Forms</a>
+      </nav>
+    </header>
 
-    <router-outlet />
+    <main class="app-shell">
+      <router-outlet />
+    </main>
   `,
   styles: [],
 })
-export class App {
-  protected readonly title = signal('angular22-signal-forms');
-}
+export class App {}
