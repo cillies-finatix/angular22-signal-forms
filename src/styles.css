@@ -160,6 +160,18 @@
 		@apply grid items-end gap-3 border-l-4 border-pine bg-emerald-50 p-3 md:grid-cols-4;
 	}
 
+	.priority-picker {
+		@apply mt-3 flex flex-wrap gap-2;
+	}
+
+	.demo-form .priority-picker button {
+		@apply bg-white px-3 py-2 text-ink ring-1 ring-[#708680] hover:bg-emerald-100 disabled:cursor-not-allowed disabled:opacity-50;
+	}
+
+	.demo-form .priority-picker button.is-selected {
+		@apply bg-pine text-white ring-pine hover:bg-pine;
+	}
+
 	.demo-form .icon-button {
 		@apply inline-flex size-10 self-end items-center justify-center p-0 text-2xl leading-none;
 	}

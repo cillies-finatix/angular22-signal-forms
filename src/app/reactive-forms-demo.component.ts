@@ -3,6 +3,9 @@ import { toSignal } from '@angular/core/rxjs-interop';
 import { ReactiveFormsModule, FormArray, FormControl, FormGroup, ValidationErrors, ValidatorFn, Validators } from '@angular/forms';
 import { startWith } from 'rxjs';
 
+import { Priority } from './priority';
+import { ReactivePriorityPickerComponent } from './reactive-priority-picker.component';
+
 type DynamicFieldType = 'string' | 'number' | 'date';
 type DynamicFieldValue = string | number | Date | null;
 
@@ -22,7 +25,7 @@ const matchingEmails: ValidatorFn = (control): ValidationErrors | null => {
 
 @Component({
   selector: 'app-reactive-forms-demo',
-  imports: [ReactiveFormsModule],
+  imports: [ReactiveFormsModule, ReactivePriorityPickerComponent],
   template: `
     <section class="page-heading" aria-labelledby="reactive-title">
       <p class="eyebrow">Reactive Forms</p>
@@ -53,6 +56,12 @@ const matchingEmails: ValidatorFn = (control): ValidationErrors | null => {
             <input type="date" [value]="toDateInput(form.controls.startDate.value)" (change)="setStartDate($event)" />
           </label>
         </div>
+      </fieldset>
+
+      <fieldset>
+        <legend>Custom ControlValueAccessor</legend>
+        <p class="hint">Die Komponente registriert sich über <code>NG_VALUE_ACCESSOR</code> und ruft die von Angular übergebenen Callbacks auf.</p>
+        <app-reactive-priority-picker formControlName="priority" />
       </fieldset>
 
       <fieldset>
@@ -142,6 +151,7 @@ export class ReactiveFormsDemoComponent {
     name: new FormControl('', { nonNullable: true, validators: [Validators.required] }),
     age: new FormControl<number | null>(null, [Validators.required, Validators.min(18)]),
     startDate: new FormControl<Date | null>(null),
+    priority: new FormControl<Priority>('medium', { nonNullable: true, validators: [Validators.required] }),
     email: new FormControl('', { nonNullable: true, validators: [Validators.required, Validators.email] }),
     emailConfirmation: new FormControl('', { nonNullable: true, validators: [Validators.required] }),
     dynamicFields: new FormArray<FormGroup<DynamicFieldControls>>([]),

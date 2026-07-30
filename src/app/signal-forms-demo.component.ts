@@ -1,6 +1,9 @@
 import { Component, computed, signal } from '@angular/core';
 import { FormField, FormRoot, applyEach, email, form, min, required, validateTree } from '@angular/forms/signals';
 
+import { Priority } from './priority';
+import { SignalPriorityPickerComponent } from './signal-priority-picker.component';
+
 type DynamicFieldType = 'string' | 'number' | 'date';
 type DynamicFieldValue = string | number | Date | null;
 
@@ -15,6 +18,7 @@ interface ProfileModel {
   name: string;
   age: number | null;
   startDate: Date | null;
+  priority: Priority;
   email: string;
   emailConfirmation: string;
   dynamicFields: DynamicFieldModel[];
@@ -22,7 +26,7 @@ interface ProfileModel {
 
 @Component({
   selector: 'app-signal-forms-demo',
-  imports: [FormField, FormRoot],
+  imports: [FormField, FormRoot, SignalPriorityPickerComponent],
   template: `
     <section class="page-heading" aria-labelledby="signal-title">
       <p class="eyebrow">Signal Forms</p>
@@ -53,6 +57,12 @@ interface ProfileModel {
             <input type="date" [value]="toDateInput(model().startDate)" (change)="setStartDate($event)" />
           </label>
         </div>
+      </fieldset>
+
+      <fieldset>
+        <legend>Custom FormValueControl</legend>
+        <p class="hint">Das Control exponiert <code>value = model.required&lt;Priority&gt;()</code>; <code>formField</code> synchronisiert es direkt mit dem Modell.</p>
+        <app-signal-priority-picker [formField]="profileForm.priority" />
       </fieldset>
 
       <fieldset>
@@ -143,6 +153,7 @@ export class SignalFormsDemoComponent {
     name: '',
     age: null,
     startDate: null,
+    priority: 'medium',
     email: '',
     emailConfirmation: '',
     dynamicFields: [],
@@ -153,6 +164,7 @@ export class SignalFormsDemoComponent {
     required(profile.name, { message: 'Name ist erforderlich.' });
     required(profile.age, { message: 'Alter ist erforderlich.' });
     min(profile.age, 18, { message: 'Mindestalter: 18 Jahre.' });
+    required(profile.priority, { message: 'Priorität ist erforderlich.' });
     required(profile.email, { message: 'E-Mail ist erforderlich.' });
     email(profile.email, { message: 'Bitte eine gültige E-Mail eingeben.' });
     required(profile.emailConfirmation, { message: 'E-Mail-Bestätigung ist erforderlich.' });
