@@ -1,7 +1,7 @@
 import { Component, computed, signal } from '@angular/core';
 import { FormField, FormRoot, applyEach, email, form, min, required, validateTree } from '@angular/forms/signals';
 
-import { Priority } from './priority';
+import { Priority } from '../../shared/priority';
 import { SignalPriorityPickerComponent } from './signal-priority-picker.component';
 
 type DynamicFieldType = 'string' | 'number' | 'date';

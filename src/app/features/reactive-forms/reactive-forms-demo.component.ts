@@ -3,7 +3,7 @@ import { toSignal } from '@angular/core/rxjs-interop';
 import { ReactiveFormsModule, FormArray, FormControl, FormGroup, ValidationErrors, ValidatorFn, Validators } from '@angular/forms';
 import { startWith } from 'rxjs';
 
-import { Priority } from './priority';
+import { Priority } from '../../shared/priority';
 import { ReactivePriorityPickerComponent } from './reactive-priority-picker.component';
 
 type DynamicFieldType = 'string' | 'number' | 'date';

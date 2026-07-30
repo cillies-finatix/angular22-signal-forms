@@ -1,7 +1,7 @@
 import { Component, input, model, output } from '@angular/core';
 import { FormValueControl } from '@angular/forms/signals';
 
-import { Priority, priorityOptions } from './priority';
+import { Priority, priorityOptions } from '../../shared/priority';
 
 @Component({
   selector: 'app-signal-priority-picker',

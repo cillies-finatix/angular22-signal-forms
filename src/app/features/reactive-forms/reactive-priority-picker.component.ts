@@ -1,7 +1,7 @@
 import { Component, forwardRef, signal } from '@angular/core';
 import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
 
-import { Priority, priorityOptions } from './priority';
+import { Priority, priorityOptions } from '../../shared/priority';
 
 @Component({
   selector: 'app-reactive-priority-picker',
